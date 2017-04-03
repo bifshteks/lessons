@@ -1,0 +1,35 @@
+import socket
+import threading                                                                
+                                                                                
+class server_thread(threading.Thread):                                          
+        def __init__(self, conn, addr):                                         
+                self.conn = conn                                                
+                self.addr = addr                                                
+                threading.Thread.__init__(self)                                 
+                                                                                
+        def run(self):                                                          
+                while True:                                                     
+                        try:                                                    
+                                data = self.conn.recv(1024)                     
+                                if data.decode('utf-8').lower() == 'close':     
+                                        self.conn.close()                       
+                                        break                                   
+                                else:                                           
+                                        self.conn.send(data)                    
+                        except:
+                                self.conn.close()                               
+                                break                                           
+                self.conn.close()                                               
+                                                                                
+def main():                                                                     
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)                   
+        s.bind(('', 2222))                                                      
+        s.listen(10)                                                            
+
+        while True:                                                             
+                conn, addr = s.accept()                                         
+                st = server_thread(conn, addr)                                  
+                st.setDaemon(True)                                              
+                st.start()                                                      
+                                                                                
+main()                                       
